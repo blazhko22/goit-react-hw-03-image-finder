@@ -1,0 +1,18 @@
+.render {
+    display: flex;
+    justify-content: space-around;
+    background-color: tomato;
+    padding: 40px 50px;
+    width: 1024px;
+    margin: auto;
+}
+
+.titleFhonebook {
+    background-color: yellow;
+    padding: 5px 10px;
+}
+
+.titleContacts {
+    background-color: green;
+    padding: 5px 10px;
+}

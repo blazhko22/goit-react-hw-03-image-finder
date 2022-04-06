@@ -1,0 +1,12 @@
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.item:first-child {
+    margin-top: 0;
+}
+.button {
+    margin-left: 50px;
+}
