@@ -1,54 +1,38 @@
 import React from 'react';
-import { nanoid } from 'nanoid';
 import s from './Searchbar.module.css';
 
 class Searchbar extends React.Component {
-  state = {
-    name: '',
-    number: '',
+  state = { name: "" };
+  onChengeValue = (e) => {
+    const { value } = e.currentTarget;
+    this.setState({ name: value });
+  };
+  handleSubmit = (evt) => {
+    const { name } = this.state;
+    evt.preventDefault();
+    this.props.onSubmit(name);
   };
 
-  handleChange = ({ target: { value, name } }) => {
-    this.setState({ [name]: value });
-  };
-
-  handleSubmitForm = event => {
-    event.preventDefault();
-    const contact = {
-      name: this.state.name,
-      number: this.state.number,
-      id: nanoid(),
-    };
-    this.props.onAddContact(contact);
-    this.setState({ name: '', number: '' });
-  };
   render() {
+    const { name } = this.state;
     return (
-      <>
-        <form className={s.form} onSubmit={this.handleSubmitForm}>
-          <label>
-            Name
-            <input className={s.input}
-              name="name"
-              type="text"
-              value={this.state.name}
-              onChange={this.handleChange}
-              required
-            />
-          </label>
-          <label>
-            Number
-            <input className={s.input}
-              name="number"
-              type="text"
-              value={this.state.number}
-              onChange={this.handleChange}
-              required
-            />
-          </label>
-          <button type="submit" className={s.button}>Add contact</button>
+      <header className={s.Searchbar}>
+        <form className={s.SearchForm} onSubmit={this.handleSubmit}>
+          <button type="submit" className={s.SearchFormButton}>
+            <span className={s.SearchFormButtonLabel}>Search</span>
+          </button>
+
+          <input
+            className={s.SearchFormInput}
+            onChange={this.onChengeValue}
+            value={name}
+            type="text"
+            autoComplete="off"
+            autoFocus
+            placeholder="Search images and photos"
+          />
         </form>
-      </>
+      </header>
     );
   }
 }

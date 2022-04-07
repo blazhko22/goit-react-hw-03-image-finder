@@ -1,27 +1,22 @@
 import React from 'react';
+import PropTypes from "prop-types";
 import s from './ImageGalleryItem.module.css';
 
-function ImageGalleryItem({
-  contact: { name, number, id },
-  onRemoveContact,
-}) {
+function ImageGalleryItem({ userImageURL, tags, id }) {
   return (
-    <li className={s.item}>
-      <span>
-        {name}: {number}
-      </span>
-      <button
-        className={s.button}
-        type="button"
-        data-id={id}
-        onClick={e => {
-          onRemoveContact(e.target.dataset.id);
-        }}
-      >
-        delete
-      </button>
-    </li>
+    <div id={id}>
+      <img
+        className={s.ImageGalleryItemImage}
+        src={userImageURL}
+        alt={tags}
+      />
+    </div>
   );
 }
-
 export default ImageGalleryItem;
+
+ImageGalleryItem.propTypes = {
+  id: PropTypes.number,
+  userImageURL: PropTypes.string,
+  tags: PropTypes.string,
+};

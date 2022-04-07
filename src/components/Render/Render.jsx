@@ -1,86 +1,112 @@
 import React, { Component } from 'react';
-import  ContactForm from '../ContactForm';
-import  ContactsList from '../ContactList';
-import Filter from '../Filter';
+import Searchbar from '../Searchbar';
+import getApi from '../API/api';
+import ImageGallery from '../ImageGallery';
+import Modal from '../Modal';
+import Button from '../Button';
+import { ToastContainer, toast } from "react-toastify";
+import { Oval } from "react-loader-spinner";
+import "react-toastify/dist/ReactToastify.css";
+// import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import s from './Render.module.css';
 
 
 class Render extends Component {
   state = {
-    contacts: [
-      // { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      // { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      // { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      // { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
+    pictures: [],
+    name: "",
+    page: 1,
+    showModal: false,
+    modalImage: "",
+    status: "idle",
+    error: "",
+    loadMore: false,
   };
 
-componentDidMount() {
-
-    const contacts = localStorage.getItem('contacts');
-    const parsedId = JSON.parse(contacts);
-
-    if (parsedId) {
-      this.setState({ contacts: parsedId });
+ componentDidUpdate(prevProps, prevState) {
+    if (prevState.name !== this.state.name) {
+      this.setState({ status: "pending" });
+      let value = getApi(this.state.name);
+      value
+        .then((res) => {
+          const pictures = res.data;
+          if (res.data.total === 0) {
+            this.setState({ loadMore: false });
+            toast.error("Could not find images with that name");
+          }
+          this.setState((prevState) => ({
+            pictures: pictures.hits,
+            page: prevState.page + 1,
+            status: "resolved",
+            loadMore: true,
+          }));
+          if (res.data.hits.length < 12) {
+            this.setState({ loadMore: false });
+          }
+        })
+        .catch((error) => this.setState({ status: "rejected", error }));
     }
   }
 
-   componentDidUpdate(prevProps, prevState) {
-
-    const nextContacts = this.state.contacts;
-    const prevContacts = prevState.contacts;
-
-    if (nextContacts !== prevContacts) {
-      localStorage.setItem('contacts', JSON.stringify(nextContacts));
+  loadMore = () => {
+    const { page, name } = this.state;
+    let value = getApi(name, page);
+    value.then((res) => {
+      const pictures = res.data;
+      this.setState((prevState) => ({
+        pictures: [...prevState.pictures, ...pictures.hits],
+        page: prevState.page + 1,
+        loadMore: true,
+      }));
+      if (res.data.hits.length < 12) {
+        this.setState({ loadMore: false });
+      }
+    });
+  };
+  toglleModal = (e) => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+    if (!this.state.showModal) {
+      if (e) {
+        this.filtredLIst(e.target.parentNode.id);
+      }
     }
-  }
-
-  handleChange = event => {
-    this.setState({ name: event.target.value });
   };
-  addContact = newContact => {
-    this.state.contacts.find(contact => contact.name.toLocaleLowerCase() === newContact.name.toLocaleLowerCase())
-      ? alert(`${newContact.name} is already in contacts`)
-      : this.setState(prevState => {
-          return {
-            contacts: [...prevState.contacts, newContact],
-          };
-        });
+  filtredLIst = (id) => {
+    const { pictures } = this.state;
+    let value = pictures.find((item) => item.id === Number(id));
+    this.setState({ modalImage: value.largeImageURL });
   };
-  onChangeFilter = filter => {
-    this.setState({ filter });
-  };
-
-  removeContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
+  findPicture = (pictureName) => {
+    if (pictureName !== this.state.name) {
+      this.setState({ name: pictureName, page: 1 });
+    }
   };
 
   render() {
-    const contacts = this.state.contacts;
-    const filter = this.state.filter;
-    const filteredContacts = contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter),
-    );
+    const { pictures, status, modalImage, showModal, loadMore } = this.state;
     return (
       <div className={s.render}>
+        <Searchbar onSubmit={this.findPicture}></Searchbar>
         <div>
-          <h1 className={s.titleFhonebook}>Phonebook</h1>
-          <ContactForm onAddContact={this.addContact}></ContactForm>
+          <div>
+            {status === "idle" && <p>please enter name picture</p>}
+            {status === "pending" && (
+              <Oval
+                height="100"
+                width="100"
+                color="grey"
+                ariaLabel="loading"
+              />
+            )}
+            {status === "resolved" && (
+              <ImageGallery pictures={pictures} open={this.toglleModal} />
+            )}
+            {loadMore && <Button loag={this.loadMore} />}
+            {showModal && <Modal src={modalImage} onClose={this.toglleModal} />}
+          </div>
         </div>
-        <div>
-          <h2 className={s.titleContacts}>Contacts</h2>
-          {contacts.length > 1 ? (
-            <Filter value={filter} onChangeFilter={this.onChangeFilter} />
-          ) : null}
-          <ContactsList
-            contacts={filteredContacts}
-            onRemoveContact={this.removeContact}>
-          </ContactsList>
-        </div>
-        </div>
+        <ToastContainer />
+      </div>
     );
   }
 }

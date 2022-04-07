@@ -1,17 +1,16 @@
 import React from 'react';
 import s from './Button.module.css';
 
-function Button({ value, onChangeFilter }) {
+function Button({ loag }) {
   return (
-    <label className={s.label}>
-      Find contacts by name
-      <input
-        name="filter"
-        type="text"
-        value={value}
-        onChange={event => onChangeFilter(event.target.value)}
-      />
-    </label>
+    <button
+      className={s.Button}
+      aria-label="Load more"
+      type="button"
+      onClick={loag}
+    >
+      Load more
+    </button>
   );
 }
 
