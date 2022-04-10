@@ -7,7 +7,6 @@ import Button from '../Button';
 import { ToastContainer, toast } from "react-toastify";
 import { Oval } from "react-loader-spinner";
 import "react-toastify/dist/ReactToastify.css";
-// import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import s from './Render.module.css';
 
 
