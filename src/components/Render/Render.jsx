@@ -22,45 +22,43 @@ class Render extends Component {
     loadMore: false,
   };
 
- componentDidUpdate(prevProps, prevState) {
-    if (prevState.name !== this.state.name) {
-      this.setState({ status: "pending" });
-      let value = getApi(this.state.name);
-      value
-        .then((res) => {
-          const pictures = res.data;
-          if (res.data.total === 0) {
-            this.setState({ loadMore: false });
-            toast.error("Could not find images with that name");
-          }
-          this.setState((prevState) => ({
+  requestImage(name,page) {
+    const value = getApi(name, page)
+    value.then((res) => {
+      const pictures = res.data;
+      if (pictures.total === 0) {
+         this.setState({ loadMore: false });
+          toast.error("Could not find images with that name");
+      }
+      page ? this.setState((prevState) => ({
+         pictures: [...prevState.pictures, ...pictures.hits],
+        page: prevState.page + 1,
+        loadMore: true,
+      })) :  this.setState((prevState) => ({
             pictures: pictures.hits,
             page: prevState.page + 1,
             status: "resolved",
             loadMore: true,
-          }));
-          if (res.data.hits.length < 12) {
-            this.setState({ loadMore: false });
-          }
-        })
-        .catch((error) => this.setState({ status: "rejected", error }));
+      }));
+        if (res.data.hits.length < 12) {
+        this.setState({ loadMore: false });
+      }
+    }).catch((error) => this.setState({ status: "rejected", error }));
+
+  }
+
+ componentDidUpdate(prevProps, prevState) {
+    if (prevState.name !== this.state.name) {
+      this.setState({ status: "pending" });
+      this.requestImage(this.state.name)
+   
     }
   }
 
   loadMore = () => {
     const { page, name } = this.state;
-    let value = getApi(name, page);
-    value.then((res) => {
-      const pictures = res.data;
-      this.setState((prevState) => ({
-        pictures: [...prevState.pictures, ...pictures.hits],
-        page: prevState.page + 1,
-        loadMore: true,
-      }));
-      if (res.data.hits.length < 12) {
-        this.setState({ loadMore: false });
-      }
-    });
+    this.requestImage(name, page)
+    
   };
   toglleModal = (e) => {
     this.setState(({ showModal }) => ({ showModal: !showModal }));
