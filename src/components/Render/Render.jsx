@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Searchbar from '../Searchbar';
-import getApi from '../API/api';
+import getApi from '../../API/api';
 import ImageGallery from '../ImageGallery';
 import Modal from '../Modal';
 import Button from '../Button';
